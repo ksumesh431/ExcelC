@@ -3,7 +3,7 @@ let sheetList = document.querySelector(".sheets-list");//parent class element of
 let firstSheet = document.querySelector(".sheet");
 let Allcells = document.querySelectorAll(".grid .col");
 let addressBox = document.querySelector(".address-box");
-let formulaInput=document.querySelector(".formula-box");
+let formulaInput = document.querySelector(".formula-box");
 let leftBtn = document.querySelector(".left");
 let rightBtn = document.querySelector(".right");
 let centerBtn = document.querySelector(".center");
@@ -16,7 +16,7 @@ let sheetDb = worksheetDb[0];  // will hold 1st sheet value by default
 
 
 
-//function to get rid and cid using address as parameter **********************************************************************************************************************************************************************************************
+//HELPER function to get rid and cid using address as parameter ****************************************************************************************
 const getRIdCId = (address) => {
     let charPart = address.charCodeAt(0);  //converts alphabet to ascii number
     let numberPart = address.slice(1);
@@ -24,9 +24,16 @@ const getRIdCId = (address) => {
     let rid = Number(numberPart) - 1;
     return { rid, cid };
 }
+//********************************************************************************************************************************************************
 
 
-//creates new sheet on clicking plus button****************************************************************************************************************************************************************************************************
+
+
+
+
+//SHEET CREATION ***************************************************************************************************************************************
+
+//creates new sheet on clicking plus button
 addbtnContainer.addEventListener("click", function () {
     let sheetsArr = document.querySelectorAll(".sheet");
     let lastSheetElem = sheetsArr[sheetsArr.length - 1];
@@ -49,7 +56,6 @@ addbtnContainer.addEventListener("click", function () {
     initCurrentSheetDb();    //initializes new sheetDb to worksheetDb array
     sheetDb = worksheetDb[idx];  // sets sheetDb as the new sheet that is created
 
-    //````````````````````^@##$@#^#$&%^%*&```````````` line below can be removed.. try
     initUi(); ////set deafult values to all the cells in frontend
 
 
@@ -70,7 +76,7 @@ function handleActiveSheet(e) {
     if (!MySheet.classList[1]) {
         MySheet.classList.add("active-sheet")
     }
-    ///above code shws clicked sheet as active sheet
+    ///above code shws clicked sheet as active sheet giving grey bg
 
 
 
@@ -87,7 +93,12 @@ function handleActiveSheet(e) {
 
 
 
-//adds event listener to every cell ..clicking on it shows address in address box********************************************************************************************************************************************************************************
+
+
+
+//adds event listener to every cell ..*******************************************************************************************************************
+
+//clicking on it shows address in address box
 for (let i = 0; i < Allcells.length; i++) {
     Allcells[i].addEventListener("click", function () {
         // Allcells[i].
@@ -124,7 +135,18 @@ for (let i = 0; i < Allcells.length; i++) {
 Allcells[0].click(); // clicks 1st cell by deafult when opening fr first time
 
 
-// left right and center alignment*****************************************************************************************************************
+
+
+
+
+
+
+
+
+
+//MENU CONTAINER *****************************************************************************************************************************************
+
+// left right and center alignment*****************
 leftBtn.addEventListener("click", function () {
     let { rid, cid } = getRIdCId(addressBox.value);
     let cell = document.querySelector(`.col[rid="${rid}"][cid="${cid}"]`);
@@ -167,8 +189,7 @@ centerBtn.addEventListener("click", function () {
 
 })
 
-
-//font size *****************************************************************************************************************************************************
+//font size *****************************************
 fontSizeBtn.addEventListener("change", function () {
     let { rid, cid } = getRIdCId(addressBox.value);
     let cell = document.querySelector(`.col[rid="${rid}"][cid="${cid}"]`);
@@ -176,7 +197,7 @@ fontSizeBtn.addEventListener("change", function () {
     cell.style.fontSize = fsize + "px";
 })
 
-//bold italic underline******************************************************************************************************************************************
+//bold italic underline*******************************
 buiContainer.addEventListener("click", function buiFn(e) {
     let { rid, cid } = getRIdCId(addressBox.value);
     let cell = document.querySelector(`.col[rid="${rid}"][cid="${cid}"]`);
@@ -204,7 +225,7 @@ buiContainer.addEventListener("click", function buiFn(e) {
     }
 })
 
-//font colour and background colour*******************************************************************************************************************************
+//font colour and background colour*******************
 colorBtn.addEventListener("input", function changeColorFn(e) {
     let { rid, cid } = getRIdCId(addressBox.value);
     let cell = document.querySelector(`.col[rid="${rid}"][cid="${cid}"]`);
@@ -217,6 +238,16 @@ bgColorBtn.addEventListener("input", function changeColorFn(e) {
     let selectedColor = e.target.value;
     cell.style.backgroundColor = selectedColor;
 })
+
+//********************************************************************************************************************************************************
+
+
+
+
+
+
+
+
 
 
 //`Syncing all cell's value with database
@@ -243,9 +274,10 @@ function setUI(sheetDb) {
     for (let i = 0; i < sheetDb.length; i++) {
         for (let j = 0; j < sheetDb[0].length; j++) {
             let cell = document.querySelector(`.col[rid="${i}"][cid="${j}"]`); //get cell for every index
-            let { halign, value } = sheetDb[i][j]; //get values from database
+            let { halign, value } = sheetDb[i][j]; //get values from database... DO THIS FOR ALL PROPERTIES OF OBJECT
 
-
+            
+            //set properties like this for all properties
             cell.style.textAlign = halign;  //sets fetched value in the current sheet
             cell.innerText = value;
         }
@@ -253,44 +285,53 @@ function setUI(sheetDb) {
     console.log(worksheetDb);
 }
 
-formulaInput.addEventListener("keydown",function(e){
-    if(e.key=="Enter" && formulaInput.value!=""){
-        let formula=formulaInput.value;
-        let evaluatedValue=evaluateFormula(formula);
+
+
+
+
+
+
+
+
+
+//WOORKING WITH FORMULAS************************************************************************************************************************************
+formulaInput.addEventListener("keydown", function (e) {
+    if (e.key == "Enter" && formulaInput.value != "") {
+        let formula = formulaInput.value;
+        let evaluatedValue = evaluateFormula(formula);
 
 
         let { rid, cid } = getRIdCId(addressBox.value);  //get current rid cid from address box
-        setUIByFormula(evaluatedValue,rid,cid);  //set calculated value at rid cid
+        setUIByFormula(evaluatedValue, rid, cid);  //set calculated value at rid cid
     }
 })
 
 
+function evaluateFormula(formula) {
 
-function evaluateFormula(formula){
-
-    let formulaTokens=formula.split(" ");
+    let formulaTokens = formula.split(" ");
 
     //formulaTokens looks like [(, A1, +, A2)]
-    for(let i=0;i<formulaTokens.length;i++){
-        let firstCharOfToken=formulaTokens[i].charCodeAt(0); //gets ascii value of 1st character
-        if(firstCharOfToken>=65 && firstCharOfToken<=90){ //if its A-Z
-            let {rid,cid}=getRIdCId(formulaTokens[i]);//get location of A1 or..
+    for (let i = 0; i < formulaTokens.length; i++) {
+        let firstCharOfToken = formulaTokens[i].charCodeAt(0); //gets ascii value of 1st character
+        if (firstCharOfToken >= 65 && firstCharOfToken <= 90) { //if its A-Z
+            let { rid, cid } = getRIdCId(formulaTokens[i]);//get location of A1 or..
 
-            let cellObject=sheetDb[rid][cid];
+            let cellObject = sheetDb[rid][cid];
             //gettign resp value from db
-            let {value}=cellObject;
-            formula=formula.replace(formulaTokens[i],value);// replace A1 with 00 or A2 with 01 in "formula"
+            let { value } = cellObject;
+            formula = formula.replace(formulaTokens[i], value);// replace A1 with 00 or A2 with 01 in "formula"
 
         }
     }
 
     //infix evaluation recommended
-    let ans=eval(formula);
+    let ans = eval(formula);
     return ans;
 
 }
 
-function setUIByFormula(value,rid,cid){ //add value at given rid,cid
-    document.querySelector(`.col[rid="${rid}"][cid="${cid}"]`).innerText=value;
+function setUIByFormula(value, rid, cid) { //add value at given rid,cid
+    document.querySelector(`.col[rid="${rid}"][cid="${cid}"]`).innerText = value;
 
 }
