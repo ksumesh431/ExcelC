@@ -113,6 +113,15 @@ for (let i = 0; i < Allcells.length; i++) {
 
         let cellObject = sheetDb[rid][cid];   //get object from sheetDb for rid and cid
 
+        //on cliking on a cell.. set the formula on the formula bar ui
+        if (cellObject.formula != "") {   //if formula not emty in database
+            formulaInput.value = cellObject.formula; //set it on ui
+        } else if (cellObject.formula == "") {
+            formulaInput.value = cellObject.value; //else set blank on formula bar UI
+        }
+
+
+
         for (let i = 0; i < allAlignBtn.length; i++) {
             allAlignBtn[i].classList.remove("active-btn");   // removes active class from b u and i buttons... cauz can select only one button at a time
         }
@@ -128,6 +137,7 @@ for (let i = 0; i < Allcells.length; i++) {
 
         }
 
+        //
 
 
     })
@@ -250,15 +260,7 @@ bgColorBtn.addEventListener("input", function changeColorFn(e) {
 
 
 
-//`Syncing all cell's value with database
-for (let i = 0; i < Allcells.length; i++) {
-    Allcells[i].addEventListener("blur", function handleCell() {
-        let { rid, cid } = getRIdCId(addressBox.value);
-        let cellObject = sheetDb[rid][cid];     //on clicking on cell ... this gets the respective cell object from database
-        let cell = document.querySelector(`.col[rid="${rid}"][cid="${cid}"]`);   // cell location on frontend
-        cellObject.value = cell.innerText;      //syncs the innertext on frontend and database
-    });
-}
+
 //`````````````````````````````````````````````````````
 
 
@@ -276,7 +278,7 @@ function setUI(sheetDb) {
             let cell = document.querySelector(`.col[rid="${i}"][cid="${j}"]`); //get cell for every index
             let { halign, value } = sheetDb[i][j]; //get values from database... DO THIS FOR ALL PROPERTIES OF OBJECT
 
-            
+
             //set properties like this for all properties
             cell.style.textAlign = halign;  //sets fetched value in the current sheet
             cell.innerText = value;
@@ -293,29 +295,68 @@ function setUI(sheetDb) {
 
 
 
-
 //WOORKING WITH FORMULAS************************************************************************************************************************************
+//`Syncing all cell's value with database
+for (let i = 0; i < Allcells.length; i++) {
+    Allcells[i].addEventListener("blur", function handleCell() {
+        let { rid, cid } = getRIdCId(addressBox.value);
+        let cellObject = sheetDb[rid][cid];     //on clicking on cell ... this gets the respective cell object from database
+        let cell = document.querySelector(`.col[rid="${rid}"][cid="${cid}"]`);   // cell location on frontend
+
+        /////////////////////////////
+        //on changing value in the cell manually...  the formula should be removed and cell's address should be remobved from parent's children array
+
+        if (cellObject.value == cell.innerText) {  //do nothing if new value enterd is same as database value
+            return;
+        }
+        if (cellObject.formula) {  //if formula exists in database
+            removeAddressFromParents(cellObject, addressBox.value);  //remove the formula and also remove address from parent's children aray
+        }
+        ///////////////////////////
+
+        cellObject.value = cell.innerText;      //syncs the innertext on frontend and database by setting ui cell value in the database
+
+        //ON EVERY BLUR/CHANGE IN VALUE... EVALUATE FUNCTIONS OF ALL THE CHILDREN AND DO RECURSIVELY FOR THERE CHILDREN
+        changeChildren(cellObject);
+
+
+    });
+}
+
+
 formulaInput.addEventListener("keydown", function (e) {
     if (e.key == "Enter" && formulaInput.value != "") {
-        let formula = formulaInput.value;
-        let evaluatedValue = evaluateFormula(formula);
-
-
+        let newFormula = formulaInput.value;
         let { rid, cid } = getRIdCId(addressBox.value);  //get current rid cid from address box
-        setUIByFormula(evaluatedValue, rid, cid);  //set calculated value at rid cid
+
+        let cellObj = sheetDb[rid][cid];
+        let prevFormula = cellObj.formula;
+
+        if (prevFormula == newFormula) {
+            return; // dont run evaluate if new formula entered is same as stored in database
+        }
+        if (prevFormula != "" && prevFormula != newFormula) {  //if formula in database is not empty and newFormula is different.. then remove the cell's address from the parents and empty the formula in db
+            removeAddressFromParents(cellObj, addressBox.value);
+        }
+
+
+
+        let evaluatedValue = evaluateFormula(newFormula);
+
+        setFormula(evaluatedValue, newFormula, rid, cid, addressBox.value);   // explaination in function comment
+
     }
 })
 
 
 function evaluateFormula(formula) {
-
     let formulaTokens = formula.split(" ");
 
     //formulaTokens looks like [(, A1, +, A2)]
     for (let i = 0; i < formulaTokens.length; i++) {
         let firstCharOfToken = formulaTokens[i].charCodeAt(0); //gets ascii value of 1st character
         if (firstCharOfToken >= 65 && firstCharOfToken <= 90) { //if its A-Z
-            let { rid, cid } = getRIdCId(formulaTokens[i]);//get location of A1 or..
+            let { rid, cid } = getRIdCId(formulaTokens[i]);//get location of A1 and A2 that are parents
 
             let cellObject = sheetDb[rid][cid];
             //gettign resp value from db
@@ -325,13 +366,75 @@ function evaluateFormula(formula) {
         }
     }
 
-    //infix evaluation recommended
-    let ans = eval(formula);
+    //infix evaluation recommended (will remove the need of spaces in formula)
+    let ans = eval(formula); ////^^&($&^&(^^^%^^^(////////////////////////////////////////////////////%$%$#%&%$@$%&$#&$#&#$#$
+
     return ans;
 
 }
 
-function setUIByFormula(value, rid, cid) { //add value at given rid,cid
+function setFormula(value, formula, rid, cid, address) {
+    //```````````````````````
+    //sets value at rid cid on the UI
     document.querySelector(`.col[rid="${rid}"][cid="${cid}"]`).innerText = value;
+    //``````````````````````````
 
+
+
+    let cellObj = sheetDb[rid][cid];
+    cellObj.value = value;   //set value and formula in database
+    cellObj.formula = formula;
+
+    //set this cell's ADDRESS in ==> PARENT's chindren array (so when parent changes ..the addresses in children array get evaluated again)
+    let formulaTokens = formula.split(" ");
+    for (let i = 0; i < formulaTokens.length; i++) {
+        let firstCharOfToken = formulaTokens[i].charCodeAt(0); //gets ascii value of 1st character
+        if (firstCharOfToken >= 65 && firstCharOfToken <= 90) { //if its A-Z
+            let parentRidCid = getRIdCId(formulaTokens[i]);//get location of A1 and A2 that are parents
+            let parentCellObject = sheetDb[parentRidCid.rid][parentRidCid.cid];   //fetch parent object
+
+            parentCellObject.children.push(address);  //push child address in parent's children array
+
+
+
+
+        }
+    }
+
+
+}
+
+function changeChildren(cellObject) {
+    let childrens = cellObject.children;
+
+    childrens.forEach(function (chAddress) {
+
+        let chRICIObj = getRIdCId(chAddress);
+        let chObj = sheetDb[chRICIObj.rid][chRICIObj.cid]; //get child object
+        let evaluatedValue = evaluateFormula(chObj.formula);  // get the child's formula and evaluates it to get value
+
+        document.querySelector(`.col[rid="${chRICIObj.rid}"][cid="${chRICIObj.cid}"]`).innerText = evaluatedValue;  // sets the new value on the UI
+        chObj.value = evaluatedValue;   // sets the new value in database
+
+        changeChildren(chObj);  //recursive call on children of chObject
+
+    })
+}
+
+function removeAddressFromParents(cellObj, address) {
+    let formula = cellObj.formula;
+    let formulaTokens = formula.split(" ");
+    for (let i = 0; i < formulaTokens.length; i++) {
+        let firstCharOfToken = formulaTokens[i].charCodeAt(0); //gets ascii value of 1st character
+        if (firstCharOfToken >= 65 && firstCharOfToken <= 90) { //if its A-Z
+            let parentRIDCIDobj = getRIdCId(formulaTokens[i]);//get parents rid and cid
+            let parentObject = sheetDb[parentRIDCIDobj.rid][parentRIDCIDobj.cid];  //get parent object
+
+            let childrens = parentObject.children;
+            let idx = childrens.indexOf(address);   //look for the index of address in children array of parent object
+            childrens.splice(idx, 1); //remove the address at that index
+        }
+    }
+
+    cellObj.formula = "";  //reset the formula of cellObj
 }

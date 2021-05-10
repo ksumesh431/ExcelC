@@ -46,8 +46,10 @@ function initCurrentSheetDb() {  //every time new sheet is created
             let cell = {  //object having default properties for each cell
                 halign: "left",
                 //sets blank values everytime new sheet databse is created
-                value: "" ,
-                     
+                value: "",
+                children: [],    //holds every cell which uses this cell for formula
+                formula: ""      //formula which decides value of this cell
+
 
 
 
