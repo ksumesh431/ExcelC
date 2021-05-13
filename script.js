@@ -62,7 +62,7 @@ addbtnContainer.addEventListener("click", function () {
 
     initUi(); ////set deafult values to all the cells in frontend
 
-
+    Allcells[0].click();  //clicks on A1 after creating new sheet
 
     //event listener of clicking on the sheet
     NewSheet.addEventListener("click", handleActiveSheet);
@@ -91,7 +91,7 @@ function handleActiveSheet(e) {
     setUI(sheetDb);  //fetches all cells data from database and sets in the selected  sheet that is passed
 
 
-
+    Allcells[0].click();  //clicks on A1 after creating new sheet
 
 }
 
@@ -146,28 +146,20 @@ for (let i = 0; i < Allcells.length; i++) {
         fontSizeBtn.value = fSize;
 
         //set bold italic underline acc to cell
-        // let bold=cellObject.bold;
-        // if(bold){
-        //     boldBtn.classList.add("active-btn");
-        // }else{boldBtn.classList.remove("active-btn");}
-
         (cellObject.bold) ? boldBtn.classList.add("active-btn") : boldBtn.classList.remove("active-btn");
-
-        // let italic=cellObject.italic;
-        // if(italic){
-        //     italicBtn.classList.add("active-btn");
-        // }else{italicBtn.classList.remove("active-btn");}
 
         (cellObject.italic) ? italicBtn.classList.add("active-btn") : italicBtn.classList.remove("active-btn");
 
-        // let underline=cellObject.underline;
-        // if(underline){
-        //     underlineBtn.classList.add("active-btn");
-        // }else{underlineBtn.classList.remove("active-btn");}
-
         (cellObject.underline) ? underlineBtn.classList.add("active-btn") : underlineBtn.classList.remove("active-btn");
 
-
+        //set font name in ui acc to cell
+        let dbFont = cellObject.fontFamily;
+        (dbFont == "Arial") ? fontFamilyBtn.selectedIndex = 0
+            : (dbFont == "Cambria") ? fontFamilyBtn.selectedIndex = 1
+                : (dbFont == "Georgia") ? fontFamilyBtn.selectedIndex = 2
+                    : (dbFont == "monospace") ? fontFamilyBtn.selectedIndex = 3
+                        : (dbFont == "sans-serif") ? fontFamilyBtn.selectedIndex = 4
+                            :fontFamilyBtn.selectedIndex = 5
 
     })
 }
@@ -511,3 +503,4 @@ function removeAddressFromParents(cellObj, address) {
 
     cellObj.formula = "";  //reset the formula of cellObj
 }
+
