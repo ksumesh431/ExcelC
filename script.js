@@ -9,7 +9,11 @@ let rightBtn = document.querySelector(".right");
 let centerBtn = document.querySelector(".center");
 let allAlignBtn = document.querySelectorAll(".alignment-container>*")   // ">*"  selects all 3 child of alignContainer and queryAll get all 3 not just 1 element 
 let fontSizeBtn = document.querySelector(".font-size");
+let fontFamilyBtn = document.querySelector(".font-family");
 let buiContainer = document.querySelector(".BUI_container");
+let boldBtn = document.querySelector(".bold");
+let italicBtn = document.querySelector(".italic");
+let underlineBtn = document.querySelector(".underline");
 let colorBtn = document.querySelector('#color');
 let bgColorBtn = document.querySelector('#bg-color');
 let sheetDb = worksheetDb[0];  // will hold 1st sheet value by default
@@ -47,11 +51,11 @@ addbtnContainer.addEventListener("click", function () {
 
     sheetList.appendChild(NewSheet);
 
-    sheetsArr.forEach(function (sheet) {
+    sheetsArr.forEach(function (sheet) {   //remove active sheet clas from all sheets
         sheet.classList.remove("active-sheet");
     })
     sheetsArr = document.querySelectorAll(".sheet"); //after creating sheets.. sheet array length is changed.. henced fetched again
-    sheetsArr[sheetsArr.length - 1].classList.add("active-sheet");
+    sheetsArr[sheetsArr.length - 1].classList.add("active-sheet");  //add active sheet class on last sheet
 
     initCurrentSheetDb();    //initializes new sheetDb to worksheetDb array
     sheetDb = worksheetDb[idx];  // sets sheetDb as the new sheet that is created
@@ -68,21 +72,21 @@ addbtnContainer.addEventListener("click", function () {
 firstSheet.addEventListener("click", handleActiveSheet);
 //gives grey colour to active sheet 
 function handleActiveSheet(e) {
+
     let MySheet = e.currentTarget;
     let sheetsArr = document.querySelectorAll(".sheet");
     sheetsArr.forEach((sheet) => {
         sheet.classList.remove("active-sheet");
     })
-    if (!MySheet.classList[1]) {
-        MySheet.classList.add("active-sheet")
-    }
+
+    MySheet.classList.add("active-sheet");
     ///above code shws clicked sheet as active sheet giving grey bg
 
 
 
     //code for fetching data of clicked sheet from databse and setting it on this sheet
     let sheetIdx = MySheet.getAttribute("sheetIdx");//gets index of current sheet
-    sheetDb = worksheetDb[sheetIdx - 1]; //point sheetDb to the respective database // used +1 as sheets ui starts from 1 but indexing start from 0
+    sheetDb = worksheetDb[sheetIdx - 1]; //point sheetDb to the respective database // used -1 as sheets ui starts from 1 but indexing start from 0
 
     setUI(sheetDb);  //fetches all cells data from database and sets in the selected  sheet that is passed
 
@@ -98,7 +102,7 @@ function handleActiveSheet(e) {
 
 //adds event listener to every cell ..*******************************************************************************************************************
 
-//clicking on it shows address in address box
+//clicking on it shows resp. properties in menu bar
 for (let i = 0; i < Allcells.length; i++) {
     Allcells[i].addEventListener("click", function () {
         // Allcells[i].
@@ -125,8 +129,8 @@ for (let i = 0; i < Allcells.length; i++) {
         for (let i = 0; i < allAlignBtn.length; i++) {
             allAlignBtn[i].classList.remove("active-btn");   // removes active class from b u and i buttons... cauz can select only one button at a time
         }
-
-        if (cellObject.halign == "left") {       // chnage button accoding to value of object for that cell
+        // chnage button accoding to value of object for that cell
+        if (cellObject.halign == "left") {
             leftBtn.classList.add("active-btn");
         } else if (cellObject.halign == "right") {
             rightBtn.classList.add("active-btn");
@@ -137,7 +141,32 @@ for (let i = 0; i < Allcells.length; i++) {
 
         }
 
-        //
+        //set font size  for that cell
+        let fSize = cellObject.fontSize;
+        fontSizeBtn.value = fSize;
+
+        //set bold italic underline acc to cell
+        // let bold=cellObject.bold;
+        // if(bold){
+        //     boldBtn.classList.add("active-btn");
+        // }else{boldBtn.classList.remove("active-btn");}
+
+        (cellObject.bold) ? boldBtn.classList.add("active-btn") : boldBtn.classList.remove("active-btn");
+
+        // let italic=cellObject.italic;
+        // if(italic){
+        //     italicBtn.classList.add("active-btn");
+        // }else{italicBtn.classList.remove("active-btn");}
+
+        (cellObject.italic) ? italicBtn.classList.add("active-btn") : italicBtn.classList.remove("active-btn");
+
+        // let underline=cellObject.underline;
+        // if(underline){
+        //     underlineBtn.classList.add("active-btn");
+        // }else{underlineBtn.classList.remove("active-btn");}
+
+        (cellObject.underline) ? underlineBtn.classList.add("active-btn") : underlineBtn.classList.remove("active-btn");
+
 
 
     })
@@ -156,6 +185,17 @@ Allcells[0].click(); // clicks 1st cell by deafult when opening fr first time
 
 //MENU CONTAINER *****************************************************************************************************************************************
 
+//font Family
+fontFamilyBtn.addEventListener("change", function (e) {
+    let fontOption = fontFamilyBtn.value;
+    let { rid, cid } = getRIdCId(addressBox.value);
+    let cell = document.querySelector(`.col[rid="${rid}"][cid="${cid}"]`);
+    cell.style.fontFamily = fontOption;
+
+    let cellObject = sheetDb[rid][cid];//get cell object from sheetDb
+    cellObject.fontFamily = fontOption;    //set left property to sheetDb
+})
+
 // left right and center alignment*****************
 leftBtn.addEventListener("click", function () {
     let { rid, cid } = getRIdCId(addressBox.value);
@@ -165,7 +205,7 @@ leftBtn.addEventListener("click", function () {
     for (let i = 0; i < allAlignBtn.length; i++) {
         allAlignBtn[i].classList.remove("active-btn");   // removes active class from b u and i buttons... cauz can select only one button at a time
     }
-    leftBtn.classList.add("acive-btn"); //add grey background class to left button
+    leftBtn.classList.add("active-btn"); //add grey background class to left button
 
     let cellObject = sheetDb[rid][cid];//get sheetDb
     cellObject.halign = "left";    //set left property to sheetDb
@@ -205,32 +245,48 @@ fontSizeBtn.addEventListener("change", function () {
     let cell = document.querySelector(`.col[rid="${rid}"][cid="${cid}"]`);
     let fsize = fontSizeBtn.value;
     cell.style.fontSize = fsize + "px";
+
+    let cellObject = sheetDb[rid][cid];//get sheetDb
+    cellObject.fontSize = fsize;    //set left property to sheetDb
 })
 
 //bold italic underline*******************************
 buiContainer.addEventListener("click", function buiFn(e) {
     let { rid, cid } = getRIdCId(addressBox.value);
     let cell = document.querySelector(`.col[rid="${rid}"][cid="${cid}"]`);
+    const cellObject = sheetDb[rid][cid];//get sheetDb
 
     let command = e.target.getAttribute("value");
     if (command == "B") {
         if (cell.classList.contains("b")) {
-            cell.classList.remove("b");
+            cellObject.bold = false;      //set bold property as false in database
+            cell.classList.remove("b");   //removed bold property from cell
+            boldBtn.classList.remove("active-btn");  //removed active clas from bold button
         } else {
+            cellObject.bold = true;
             cell.classList.add("b");
+            boldBtn.classList.add("active-btn");
         }
 
     } else if (command == "U") {
         if (cell.classList.contains("u")) {
+            cellObject.underline = false;
             cell.classList.remove("u");
+            underlineBtn.classList.remove("active-btn");
         } else {
+            cellObject.underline = true;
             cell.classList.add("u");
+            underlineBtn.classList.add("active-btn");
         }
     } else if (command == "I") {
         if (cell.classList.contains("i")) {
+            cellObject.italic = false;
             cell.classList.remove("i");
+            italicBtn.classList.remove("active-btn");
         } else {
+            cellObject.italic = true;
             cell.classList.add("i");
+            italicBtn.classList.add("active-btn");
         }
     }
 })
@@ -269,21 +325,38 @@ function initUi() {
     Allcells.forEach(function (eachCell) {
         eachCell.style.textAlign = "left";
         eachCell.innerText = "";
+        eachCell.style.fontFamily = "Arial";
+        eachCell.style.fontSize = "20px";
+        eachCell.classList.remove("b");
+        eachCell.classList.remove("i");
+        eachCell.classList.remove("u");
     })
+
 }
+initUi();//call for 1st time setting of default values;
+
 
 function setUI(sheetDb) {
     for (let i = 0; i < sheetDb.length; i++) {
         for (let j = 0; j < sheetDb[0].length; j++) {
             let cell = document.querySelector(`.col[rid="${i}"][cid="${j}"]`); //get cell for every index
-            let { halign, value } = sheetDb[i][j]; //get values from database... DO THIS FOR ALL PROPERTIES OF OBJECT
+            let { halign, value, fontFamily, fontSize, bold, italic, underline } = sheetDb[i][j]; //get values from database... DO THIS FOR ALL PROPERTIES OF OBJECT
 
 
             //set properties like this for all properties
             cell.style.textAlign = halign;  //sets fetched value in the current sheet
+            cell.style.fontSize = fontSize + "px";
+            cell.style.fontFamily = fontFamily;
             cell.innerText = value;
+
+            (bold) ? cell.classList.add("b") : cell.classList.remove("b");
+            (italic) ? cell.classList.add("i") : cell.classList.remove("i");
+            (underline) ? cell.classList.add("u") : cell.classList.remove("u");
         }
     }
+
+
+
     console.log(worksheetDb);
 }
 

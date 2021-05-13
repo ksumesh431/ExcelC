@@ -47,6 +47,11 @@ function initCurrentSheetDb() {  //every time new sheet is created
                 halign: "left",
                 //sets blank values everytime new sheet databse is created
                 value: "",
+                fontFamily:"Arial",
+                fontSize:20,
+                bold:false,
+                italic:false,
+                underline:false,
                 children: [],    //holds every cell which uses this cell for formula
                 formula: ""      //formula which decides value of this cell
 
