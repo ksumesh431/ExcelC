@@ -16,6 +16,7 @@ let italicBtn = document.querySelector(".italic");
 let underlineBtn = document.querySelector(".underline");
 let colorBtn = document.querySelector('#color');
 let bgColorBtn = document.querySelector('#bg-color');
+let leftColSpecific=document.querySelectorAll(".left-col .left-col_box");
 let sheetDb = worksheetDb[0];  // will hold 1st sheet value by default
 
 
@@ -159,9 +160,18 @@ for (let i = 0; i < Allcells.length; i++) {
                 : (dbFont == "Georgia") ? fontFamilyBtn.selectedIndex = 2
                     : (dbFont == "monospace") ? fontFamilyBtn.selectedIndex = 3
                         : (dbFont == "sans-serif") ? fontFamilyBtn.selectedIndex = 4
-                            :fontFamilyBtn.selectedIndex = 5
+                            : fontFamilyBtn.selectedIndex = 5
 
     })
+
+
+    Allcells[i].addEventListener("keydown", function (e) {
+        let obj = Allcells[i].getBoundingClientRect();   //this gives a object which have all height width etc properties
+        let height = obj.height;
+        let { rid} = getRIdCId(addressBox.value);
+        let reqLeftCol = leftColSpecific[rid];  //get the specific row of the left coloumn
+        reqLeftCol.style.height = height + "px";
+    });
 }
 Allcells[0].click(); // clicks 1st cell by deafult when opening fr first time
 
