@@ -523,11 +523,12 @@ function removeAddressFromParents(cellObj, address) {
 gridContainer.addEventListener("scroll", function () {
     let top = gridContainer.scrollTop;   //pixels scrolled away from top
     let left = gridContainer.scrollLeft; ////pixels scrolled away from left
-
-    topRow.style.top = top + "px";
-    leftCol.style.left = left + "px";
-    topLeftArea.style.left = left + "px";
-    topLeftArea.style.top = top + "px";
+    setTimeout(function(){
+        topRow.style.top = top + "px";
+        leftCol.style.left = left + "px";
+        topLeftArea.style.left = left + "px";
+        topLeftArea.style.top = top + "px";
+    },0)
 
 
 })
