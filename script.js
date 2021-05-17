@@ -17,7 +17,7 @@ let underlineBtn = document.querySelector(".underline");
 let colorBtn = document.querySelector('#color');
 let bgColorBtn = document.querySelector('#bg-color');
 let leftColSpecific = document.querySelectorAll(".left-col .left-col_box");
-let gridContainer=document.querySelector(".grid_container");
+let gridContainer = document.querySelector(".grid_container");
 let topLeftArea = document.querySelector(".top-left-block");
 let sheetDb = worksheetDb[0];  // will hold 1st sheet value by default
 
@@ -523,12 +523,12 @@ function removeAddressFromParents(cellObj, address) {
 gridContainer.addEventListener("scroll", function () {
     let top = gridContainer.scrollTop;   //pixels scrolled away from top
     let left = gridContainer.scrollLeft; ////pixels scrolled away from left
-    setTimeout(function(){
-        topRow.style.top = top + "px";
-        leftCol.style.left = left + "px";
-        topLeftArea.style.left = left + "px";
-        topLeftArea.style.top = top + "px";
-    },0)
+
+    topRow.style.top = top + "px";
+    leftCol.style.left = left + "px";
+    topLeftArea.style.left = left + "px";
+    topLeftArea.style.top = top + "px";
+
 
 
 })
