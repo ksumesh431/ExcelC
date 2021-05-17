@@ -16,7 +16,9 @@ let italicBtn = document.querySelector(".italic");
 let underlineBtn = document.querySelector(".underline");
 let colorBtn = document.querySelector('#color');
 let bgColorBtn = document.querySelector('#bg-color');
-let leftColSpecific=document.querySelectorAll(".left-col .left-col_box");
+let leftColSpecific = document.querySelectorAll(".left-col .left-col_box");
+let gridContainer=document.querySelector(".grid_container");
+let topLeftArea = document.querySelector(".top-left-block");
 let sheetDb = worksheetDb[0];  // will hold 1st sheet value by default
 
 
@@ -168,7 +170,7 @@ for (let i = 0; i < Allcells.length; i++) {
     Allcells[i].addEventListener("keydown", function (e) {
         let obj = Allcells[i].getBoundingClientRect();   //this gives a object which have all height width etc properties
         let height = obj.height;
-        let { rid} = getRIdCId(addressBox.value);
+        let { rid } = getRIdCId(addressBox.value);
         let reqLeftCol = leftColSpecific[rid];  //get the specific row of the left coloumn
         reqLeftCol.style.height = height + "px";
     });
@@ -514,3 +516,18 @@ function removeAddressFromParents(cellObj, address) {
     cellObj.formula = "";  //reset the formula of cellObj
 }
 
+
+
+
+//reaaranging left col, top row and top left block according to sroll******************************************************************************
+gridContainer.addEventListener("scroll", function () {
+    let top = gridContainer.scrollTop;   //pixels scrolled away from top
+    let left = gridContainer.scrollLeft; ////pixels scrolled away from left
+
+    topRow.style.top = top + "px";
+    leftCol.style.left = left + "px";
+    topLeftArea.style.left = left + "px";
+    topLeftArea.style.top = top + "px";
+
+
+})

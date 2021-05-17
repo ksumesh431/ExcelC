@@ -94,6 +94,8 @@ body {
   width: 25px;
   background-color: rgb(61, 61, 55);
   border: 0.1px solid;
+  z-index: 100;
+  position: absolute;
 }
 
 .top-row {
@@ -106,6 +108,7 @@ body {
   left: 25px;
   font: 0.8em sans-serif;
   font-weight: bold;
+  z-index: 90;
 }
 .left-col {
   width: 25px;
@@ -113,6 +116,9 @@ body {
   background-color: #ceead6;
   font: 0.8em sans-serif;
   font-weight: bold;
+  position: absolute;
+  z-index: 90;
+  top: 30px;
 }
 
 .top-col {
